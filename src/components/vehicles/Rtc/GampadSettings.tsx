@@ -152,7 +152,7 @@ export default function GamepadSettings({open, onClose} : {open: boolean, onClos
         onClose();
     }
     if (assignButton !== null && gamepad) {
-        const foundPressedButtonIndex = gamepad?.originalGamepad?.buttons.findIndex((button: number) => button.pressed);
+        const foundPressedButtonIndex = gamepad?.originalGamepad?.buttons.findIndex((button: {pressed: boolean}) => button.pressed);
         if (foundPressedButtonIndex !== -1) {
             gamepad.overrideButton(foundPressedButtonIndex, assignButton);
             setAssignButton(null);

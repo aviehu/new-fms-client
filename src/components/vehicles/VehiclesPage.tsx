@@ -57,7 +57,7 @@ export default function VehiclesPage() {
 
     return (
         <Box margin={5} minWidth={850}>
-            <Button variant={'contained'} size={'small'} onClick={() => setOpenGamepadSettings(true)}>Open Gamepad Settings</Button>
+            <Button variant={'contained'} size={'small'} onClick={() => setOpenGamepadSettings(true)}>Gamepad Settings</Button>
             <GamepadSettings open={openGamepadSettings} onClose={() => setOpenGamepadSettings(false)}/>
             <Stack visibility='hidden' direction={'row-reverse'}>
                 <Tooltip title="Add VideoPipeline">
