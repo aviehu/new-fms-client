@@ -1,6 +1,6 @@
 import {useApi} from "../../hooks/useApi.ts";
 import {
-    Box, Button,
+    Box, Chip,
     IconButton,
     Paper,
     Stack,
@@ -9,22 +9,60 @@ import {
     TableCell,
     TableContainer,
     TableHead,
-    TableRow,
-    Tooltip
+    TableRow, TextField,
+    Tooltip, Typography
 } from "@mui/material";
 import {ReturnVideoPipeline, Vehicle} from "../../types";
 import MonitorIcon from '@mui/icons-material/Monitor';
-import AddIcon from "@mui/icons-material/Add";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import LinkOffIcon from '@mui/icons-material/LinkOff';
 import {useNavigate} from "react-router-dom";
-import GamepadSettings from "./Rtc/GampadSettings.tsx";
-import {useState} from "react";
+import {useEffect, useState} from "react";
+import {useAuth0} from "@auth0/auth0-react";
+
+
+function StreamerStatus({status}: {status: string}) {
+    if(status === 'connectedToNode') {
+        return (
+            <Chip size={'small'} label="Connected To Node" color="primary" />
+        )
+    }
+    return (
+        <Chip size={'small'} label={status} variant={'outlined'}/>
+    )
+}
 
 export default function VehiclesPage() {
-    const [openGamepadSettings, setOpenGamepadSettings] = useState<boolean>(false)
+    const {getIdTokenClaims} = useAuth0()
     const { vehicles, videoPipelines, releaseVehicle, assignVehicle } = useApi()
     const navigate = useNavigate()
+    const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>(vehicles)
+    const [search, setSearch] = useState<string>('')
+    const [isAdmin, setIsAdmin] = useState<boolean>(false)
+
+    function filterVehicles(search: string): Vehicle[] {
+        return vehicles.filter((vehicle) => {
+            return !search || vehicle.vin.includes(search)
+        })
+    }
+
+    useEffect(() => {
+        async function isAdmin() {
+            if(!getIdTokenClaims) {
+                return false
+            }
+            const claims = await getIdTokenClaims()
+            if(!claims) {
+                return false
+            }
+            setIsAdmin(claims['https://driveu.auto/roles'].includes('Admin'))
+        }
+        isAdmin()
+    }, [getIdTokenClaims]);
+
+    useEffect(() => {
+        setFilteredVehicles(filterVehicles(search))
+    }, [vehicles, search]);
 
      function assignIfNeeded(vin: string, videoPipeline: ReturnVideoPipeline | undefined, nativeNode: boolean){
         if(videoPipeline) {
@@ -57,42 +95,37 @@ export default function VehiclesPage() {
 
     return (
         <Box margin={5} minWidth={850}>
-            <Button variant={'contained'} size={'small'} onClick={() => setOpenGamepadSettings(true)}>Gamepad Settings</Button>
-            <GamepadSettings open={openGamepadSettings} onClose={() => setOpenGamepadSettings(false)}/>
-            <Stack visibility='hidden' direction={'row-reverse'}>
-                <Tooltip title="Add VideoPipeline">
-                    <IconButton>
-                        <AddIcon />
-                    </IconButton>
-                </Tooltip>
+            <Stack direction={'row'} justifyContent={'space-between'}>
+                <Typography paddingBottom={3} variant={'h5'}>Vehicles</Typography>
+                <TextField label={'Search By Vin'} size={'small'} value={search} onChange={event => setSearch(event.target.value)}/>
             </Stack>
             <TableContainer component={Paper}>
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <TableCell>VIN</TableCell>
-                            <TableCell align="left">UUID</TableCell>
+                            <TableCell>Vin</TableCell>
+                            <TableCell align="left">Streamer Uuid</TableCell>
                             <TableCell align="left">Status</TableCell>
                             <TableCell align="left">Version</TableCell>
-                            <TableCell align="left">VideoPipeline</TableCell>
-                            <TableCell align="left">RTC</TableCell>
+                            <TableCell align="left">VideoPipeline Uuid</TableCell>
+                            <TableCell align="left">Rtc</TableCell>
                             <TableCell align="left">Node</TableCell>
-                            <TableCell align="left"></TableCell>
+                            {isAdmin ? <TableCell align="left"></TableCell> : null}
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {vehicles.map((row) => {
+                        {filteredVehicles.map((row) => {
                             const videoPipeline = videoPipelines.find((pipeline) => pipeline.vin === row.vin)
                             return (
                             <TableRow
                                 key={row.vin}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
-                                <TableCell component="th" scope="row">{row.vin}</TableCell>
+                                <TableCell component="th" scope="row"><Typography fontWeight={'bold'} variant={'body2'}>{row.vin}</Typography></TableCell>
                                 <TableCell align="left">{row.streamer_uuid}</TableCell>
-                                <TableCell align="left">{row.streamer_status}</TableCell>
+                                <TableCell align="left"><StreamerStatus status={row.streamer_status}/></TableCell>
                                 <TableCell align="left">{row.streamer_version}</TableCell>
-                                <TableCell align="left">{ videoPipeline?.relay_uuid}</TableCell>
+                                <TableCell align="left">{videoPipeline ? <Chip size={'small'} variant={'outlined'}  label={videoPipeline?.relay_uuid}/> : null}</TableCell>
                                 <TableCell style={{paddingTop: 0, paddingBottom: 0}} align="left">
                                     <Stack direction={'row'}>
                                         <Tooltip title={`Monitor ${row.vin}`}>
@@ -125,7 +158,7 @@ export default function VehiclesPage() {
                                         </Tooltip>
                                     </Stack>
                                 </TableCell>
-                                <TableCell style={{paddingTop: 0, paddingBottom: 0}} align="left">
+                                {isAdmin ? <TableCell style={{paddingTop: 0, paddingBottom: 0}} align="left">
                                     <Stack direction={'row'}>
                                         <Tooltip title={`Release ${row.vin}`}>
                                             <span>
@@ -135,7 +168,7 @@ export default function VehiclesPage() {
                                             </span>
                                         </Tooltip>
                                     </Stack>
-                                </TableCell>
+                                </TableCell> : null }
                             </TableRow>
                         )})}
                     </TableBody>

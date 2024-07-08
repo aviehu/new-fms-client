@@ -1,0 +1,88 @@
+.vCenterItems-webrtc {
+    /* background-color: #282c34; */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.hCenterItems-webrtc {
+    /* background-color: #282c34; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin: 5px
+}
+
+.hCenterItems2-webrtc {
+    /* background-color: #282c34; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    color: white;
+    margin: 5px
+}
+
+.controlButton {
+    margin: 5px;
+}
+
+.video-container--outer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.video-container--inner {
+    position: relative;
+    display: flex;
+}
+
+.video-container--outer:fullscreen .video-container--inner {
+    height: 100%;
+}
+
+.video-container--outer:fullscreen .video {
+    width: 100%;
+    height: 100%;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.video-label-top-left {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.video-label-top-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: rotateZ(90deg)
+}
+
+.video-label-bottom-right {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    transform: rotateZ(180deg)
+}
+
+.video-label-bottom-left {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    transform: rotateZ(270deg)
+}

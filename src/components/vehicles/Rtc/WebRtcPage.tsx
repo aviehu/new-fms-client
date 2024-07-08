@@ -9,7 +9,11 @@ import NodeApi from './nodeApi'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import Controller from  './controller'
-import {Button} from "@mui/material";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import Stream from './WebRtcStream.jsx'
+import './WebRtc.css';
+
 
 type MetaData = {
     battery: number,
@@ -36,19 +40,18 @@ const protocol = isLocal ? "http://" : "https://"
 
 
 
-export default function WebRtc() {
-    const {node_uuid, rtc_url, hostId, node_url, node_socket_url, description, control, mobile, picassoWsUrl} = useParams()
+export default function WebRtcPage() {
+    const {node_uuid, rtc_url, hostId, node_url, node_socket_url, description, control, picassoWsUrl} = useParams()
     const updateSocket = useWebSocket();
     const [serverReady, setServerReady] = useState(false);
     const [webRtcUrl, setwebRtcUrl] = useState<string | null>(null);
     const [nodeUrl, setNodeUrl] = useState<string | null>(null);
     const [streams, setStreams] = useState<any[]>([]);
     const [socketState, setSocketState] = useState(SOCKET_STATES.disconnected);
-    const [joystickData, setjoystickData] = useState(null);
+    const [joystickData, setjoystickData] = useState<any>(null);
     const [nodeConnected, setNodeConnected] = useState<boolean>(false);
     const [metaData, setMetaData] = useState< MetaData | null>(null);
     const [inControl, setInControl] = useState(false);
-    const [showGamePadDialog, setShowGamePadDialog] = useState(false);
 
     function getRtcUrl() {
         if (isValidUrl(rtc_url)) {
@@ -165,12 +168,12 @@ export default function WebRtc() {
     }
 
     return (
-        <div className="App">
+        <div >
             <div>
                 <h2>{hostId + " :: " + description}</h2>
             </div>
             {
-                !serverReady ?
+                ! serverReady ?
                     (
                         <div>NO RTC AVAILABLE</div>
                     )
@@ -224,8 +227,6 @@ export default function WebRtc() {
                                                         :
                                                         null
                                                 }
-                                                <GamepadSettingsModal open={showGamePadDialog} onClose={() => setShowGamePadDialog(false)} />
-                                                <Button variant="contained" size={"small"} onClick={() => setShowGamePadDialog(true)}>Gamepad Settings</Button>
                                             </div>
                                         </div>
                                         <div className="hCenterItems2-webrtc" style={{minHeight: "145px"}}>

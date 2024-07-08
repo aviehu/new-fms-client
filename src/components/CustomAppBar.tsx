@@ -1,23 +1,22 @@
 import {ReactNode, useState} from "react";
 import {
     AppBar,
-    Box, Button,
+    Box,
     Divider,
     Drawer,
     IconButton,
     List,
     ListItem, ListItemButton, ListItemIcon, ListItemText,
     Stack,
-    Toolbar,
+    Toolbar, Tooltip,
     Typography
 } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from "@mui/icons-material/Settings";
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
-import TuneIcon from '@mui/icons-material/Tune';
 import { useNavigate } from "react-router-dom";
 import {useAuth0} from "@auth0/auth0-react";
-
+import LogoutIcon from '@mui/icons-material/Logout';
 function CustomDrawer({setOpen} : {setOpen: (open: boolean) => void }) {
     const navigate = useNavigate()
 
@@ -40,19 +39,11 @@ function CustomDrawer({setOpen} : {setOpen: (open: boolean) => void }) {
             <Divider />
             <List>
                 <ListItem key={'vehicles'} disablePadding>
-                    <ListItemButton onClick={() => { handleNavigate('/vehicles') }}>
+                    <ListItemButton onClick={() => { handleNavigate('/') }}>
                         <ListItemIcon>
                             <DirectionsCarIcon/>
                         </ListItemIcon>
                         <ListItemText primary={'Vehicles'} />
-                    </ListItemButton>
-                </ListItem>
-                <ListItem key={'priorities'} disablePadding>
-                    <ListItemButton onClick={() => { handleNavigate('/priorities') }}>
-                        <ListItemIcon>
-                            <TuneIcon/>
-                        </ListItemIcon>
-                        <ListItemText primary={'Priorities'} />
                     </ListItemButton>
                 </ListItem>
                 <ListItem key={'settings'} disablePadding>
@@ -103,7 +94,11 @@ export default function CustomAppBar({children}: {children : ReactNode}) {
                                 FMS Client
                             </Typography>
                         </Box>
-                        <Button style={{color: 'white'}} variant={'outlined'} onClick={() => {logout({logoutParams: {returnTo: window.location.origin}})}}>Logout</Button>
+                        <Tooltip title={'Logout'}>
+                            <IconButton style={{color: "white"}} onClick={() => {logout({logoutParams: {returnTo: window.location.origin}})}}>
+                                <LogoutIcon/>
+                            </IconButton>
+                        </Tooltip>
                     </Stack>
                 </Toolbar>
 

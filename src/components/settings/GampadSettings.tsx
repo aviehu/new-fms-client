@@ -1,11 +1,10 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import useGamepad from './useGamepad'
+import useGamepad from '../vehicles/Rtc/useGamepad'
 import {useEffect, useState} from "react";
 import {
     Box,
     Button,
-    Modal,
     Paper,
     Tab,
     Tabs,
@@ -14,7 +13,7 @@ import {
     TableHead,
     TableRow,
     TableCell,
-    TableBody, Typography, FormGroup, FormControlLabel, Checkbox, Card, Stack
+    TableBody, Typography, FormGroup, FormControlLabel, Checkbox
 } from "@mui/material"
 
 interface TabPanelProps {
@@ -56,9 +55,10 @@ function GamepadSettingsTabs({ gamepad, setAssignButton } : {gamepad: any, setAs
             <Tab label="buttons" />
             <Tab label="axes" />
             <Tab label="Configure Joystick" />
+            <Tab label="Revert" />
         </Tabs>
         <CustomTabPanel index={0} value={activeTab}>
-            <Box margin={5} minWidth={850}>
+            <Box margin={5}>
                 <TableContainer component={Paper}>
                     <Table>
                         <TableHead>
@@ -83,14 +83,14 @@ function GamepadSettingsTabs({ gamepad, setAssignButton } : {gamepad: any, setAs
             </Box>
         </CustomTabPanel>
         <CustomTabPanel index={1} value={activeTab}>
-            <Box margin={5} minWidth={850}>
+            <Box margin={5} >
                 <TableContainer component={Paper}>
                     <Table>
                         <TableHead>
                             <TableRow>
                                 <TableCell>Output</TableCell>
                                 <TableCell>Input</TableCell>
-                                <TableCell style={{width: 300}}>Value</TableCell>
+                                <TableCell>Value</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -130,12 +130,16 @@ function GamepadSettingsTabs({ gamepad, setAssignButton } : {gamepad: any, setAs
                 </FormGroup>
             </div>
         </CustomTabPanel>
+        <CustomTabPanel index={3} value={activeTab}>
+            <Typography>This will restore all of the gamepad settings to the default settings </Typography>
+            <Button size={'small'} style={{marginTop: 20}} variant={'contained'} onClick={gamepad?.revertSetting}>Revert </Button>
+        </CustomTabPanel>
     </Box>
 }
 
-export default function GamepadSettings({open, onClose} : {open: boolean, onClose: () => void}) {
+export default function GamepadSettings() {
     const [assignButton, setAssignButton] = useState<number | null>(null)
-    const gamepad = useGamepad(open ? 100 : 0)
+    const gamepad = useGamepad(100)
 
     function getMessage() {
         if (!gamepad) {
@@ -146,11 +150,8 @@ export default function GamepadSettings({open, onClose} : {open: boolean, onClos
         }
         return null;
     }
+
     const message = getMessage();
-    function handleClose() {
-        setAssignButton(null);
-        onClose();
-    }
     if (assignButton !== null && gamepad) {
         const foundPressedButtonIndex = gamepad?.originalGamepad?.buttons.findIndex((button: {pressed: boolean}) => button.pressed);
         if (foundPressedButtonIndex !== -1) {
@@ -160,19 +161,8 @@ export default function GamepadSettings({open, onClose} : {open: boolean, onClos
     }
 
     return (
-        <Modal
-            open={open}
-            onClose={handleClose}
-        >
-            <Card style={{margin: 50}} >
-                {!message &&
-                    <Stack direction={'row'} justifyContent={"space-between"}>
-                        <div/>
-                        <Button variant={"contained"} onClick={gamepad?.revertSetting}>Revert</Button>
-                    </Stack>
-                }
-                {message || <GamepadSettingsTabs gamepad={gamepad} setAssignButton={setAssignButton}/>}
-            </Card>
-        </Modal>
+        <div >
+            {message || <GamepadSettingsTabs gamepad={gamepad} setAssignButton={setAssignButton}/>}
+        </div>
     )
 }
