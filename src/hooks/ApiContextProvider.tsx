@@ -1,5 +1,12 @@
 import {createContext, useEffect, useState , ReactNode} from "react";
-import {BasePriority, ReturnVideoPipeline, Vehicle, WsStatusMessage, WsStreamerPipelineMessage} from "../types";
+import {
+    BasePriority,
+    ReturnVideoPipeline,
+    Vehicle,
+    WsHostMessage,
+    WsStatusMessage,
+    WsStreamerPipelineMessage
+} from "../types";
 import {
     fmsAssignPipeline,
     fmsCreatePipeline, fmsCreatePriority,
@@ -49,6 +56,11 @@ export function ApiContextProvider({children}: {children: ReactNode}) {
             return
         }
 
+        socket.removeListener('status')
+        socket.removeListener('streamerPipeline')
+        socket.removeListener('host')
+        socket.removeListener('version')
+
         socket.on('status', (data: WsStatusMessage) => {
             if(data.type === "streamer") {
                 const newVehicles = [...vehicles]
@@ -85,8 +97,13 @@ export function ApiContextProvider({children}: {children: ReactNode}) {
             const updatedPipelines = [...videoPipelines]
             updatedPipelines[pipelineIndex] = {...updatedPipelines[pipelineIndex], streamer_uuid: data.uuid, streamer_status: vehicle.streamer_status, streamer_version: vehicle.streamer_version, vin: vehicle.vin}
             setVideoPipelines(updatedPipelines)
-            console.log({updatedPipelines})
         })
+
+        socket.on('host', (data: WsHostMessage) => {
+            const newVehicle: Vehicle = {vin: data.host.hostId, group: data.group, streamer_status: 'offline', streamer_uuid: data.uuid, streamer_version: '' }
+            setVehicles([...vehicles, newVehicle])
+        })
+
     }, [socket, vehicles, videoPipelines]);
 
     useEffect(() => {
@@ -109,7 +126,7 @@ export function ApiContextProvider({children}: {children: ReactNode}) {
             setAlert(response.error)
             return
         }
-        setVideoPipelines(await fmsGetVideoPipelines(null, 'false', 'AAA'))
+        setVideoPipelines([...videoPipelines, response])
     }
 
     async function deleteVideoPipeline(relay_uuid: string) {

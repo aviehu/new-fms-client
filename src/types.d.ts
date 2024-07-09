@@ -1,3 +1,5 @@
+import 'vite/client'
+
 export type BaseStreamer = {
     uuid: string,
     name?: string,
@@ -179,4 +181,12 @@ export type WsStreamerPipelineMessage = {
     group: string,
     relay_uuid: string | undefined,
     uuid: string
+}
+
+export type WsHostMessage = {
+    type: 'streamer' | 'relay' | 'node',
+    id: string,
+    uuid: string,
+    host: {identityType: string, hostId: string, description: string, group: string}
+    group: string
 }

@@ -15,7 +15,7 @@ export default function WebsocketProvider({children}: {children: ReactNode}) {
             const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         })
-        const newSocket = io('http://localhost:8040', {auth: {uuid: uuid , token: 'AAA'}})
+        const newSocket = io(import.meta.env.VITE_DLC_SOCKET_URL, {auth: {uuid: uuid , token: 'AAA'}})
         setSocket(newSocket);
 
         newSocket.on("connect", () => {
