@@ -17,6 +17,7 @@ import {
 } from "../api.ts";
 import {useWebSocket} from "./useWebSocket.ts";
 import {useAlerts} from "./useAlerts.ts";
+import {useAuth0} from "@auth0/auth0-react";
 
 export const ApiContext = createContext<{
     videoPipelines: ReturnVideoPipeline[],
@@ -50,7 +51,8 @@ export function ApiContextProvider({children}: {children: ReactNode}) {
     const [priorities, setPriorities] = useState<BasePriority[]>([])
     const socket = useWebSocket()
     const {setAlert} = useAlerts()
-
+    const {getAccessTokenSilently} = useAuth0()
+    getAccessTokenSilently().then(token => console.log(token))
     useEffect(() => {
         if(!socket) {
             return
@@ -108,10 +110,11 @@ export function ApiContextProvider({children}: {children: ReactNode}) {
 
     useEffect(() => {
         async function getData() {
+            const token = await getAccessTokenSilently()
             const [videoPipelines, vehicles, priorities] = await Promise.all([
-                fmsGetVideoPipelines(null, 'false', 'AAA'),
-                fmsGetAllVehicles('AAA'),
-                fmsGetPriorities('AAA')
+                fmsGetVideoPipelines(null, 'false', token),
+                fmsGetAllVehicles(token),
+                fmsGetPriorities(token)
             ])
             setVideoPipelines(videoPipelines)
             setVehicles(vehicles)
@@ -121,7 +124,8 @@ export function ApiContextProvider({children}: {children: ReactNode}) {
     }, []);
 
     async function addVideoPipeline(body: Record<string, string | number>) {
-        const response = await fmsCreatePipeline(body, 'AAA')
+        const token = await getAccessTokenSilently()
+        const response = await fmsCreatePipeline(body, token)
         if(response.error) {
             setAlert(response.error)
             return
@@ -130,53 +134,59 @@ export function ApiContextProvider({children}: {children: ReactNode}) {
     }
 
     async function deleteVideoPipeline(relay_uuid: string) {
-        const response = await fmsDeletePipeline(relay_uuid, 'AAA')
+        const token = await getAccessTokenSilently()
+        const response = await fmsDeletePipeline(relay_uuid, token)
         if(response.error) {
             setAlert(response.error)
             return
         }
-        setVideoPipelines(await fmsGetVideoPipelines(null, 'false', 'AAA'))
+        setVideoPipelines(await fmsGetVideoPipelines(null, 'false', token))
     }
 
     async function updateOverrides(relay_uuid: string, static_allocation: boolean | undefined, planned_downtime: boolean | undefined) {
-        const response = await fmsUpdateOverrides(relay_uuid, static_allocation, planned_downtime, 'AAA')
+        const token = await getAccessTokenSilently()
+        const response = await fmsUpdateOverrides(relay_uuid, static_allocation, planned_downtime, token)
         if(response.error) {
             setAlert(response.error)
             return
         }
-        setVideoPipelines(await fmsGetVideoPipelines(null, 'false', 'AAA'))
+        setVideoPipelines(await fmsGetVideoPipelines(null, 'false', token))
     }
 
     async function addPriority(group: string, node_set: string, relay_set: string[]) {
-        const response = await fmsCreatePriority(group, node_set, relay_set, 'AAA')
+        const token = await getAccessTokenSilently()
+        const response = await fmsCreatePriority(group, node_set, relay_set, token)
         if(response.error) {
             setAlert(response.error)
             return
         }
-        setPriorities(await fmsGetPriorities('AAA'))
+        setPriorities(await fmsGetPriorities(token))
     }
 
     async function deletePriority(node_set: string) {
-        const response = await fmsDeletePriority(node_set, 'AAA')
+        const token = await getAccessTokenSilently()
+        const response = await fmsDeletePriority(node_set, token)
         if(response.error) {
             setAlert(response.error)
             return
         }
-        setPriorities(await fmsGetPriorities('AAA'))
+        setPriorities(await fmsGetPriorities(token))
     }
 
     async function editPriority(node_set: string, group: string, relay_sets: string[]) {
-        const response = await fmsUpdatePriority(node_set, group, relay_sets, 'AAA')
+        const token = await getAccessTokenSilently()
+        const response = await fmsUpdatePriority(node_set, group, relay_sets, token)
         if(response.error) {
             setAlert(response.error)
             return
         }
-        setPriorities(await fmsGetPriorities('AAA'))
+        setPriorities(await fmsGetPriorities(token))
     }
 
     async function assignVehicle(vin: string, nativeNode: boolean, node_set: string): Promise<ReturnVideoPipeline | null>  {
+        const token = await getAccessTokenSilently()
         const native_node = nativeNode ? 'true' : 'false'
-        const response = await fmsAssignPipeline(vin, native_node, node_set, 'AAA')
+        const response = await fmsAssignPipeline(vin, native_node, node_set, token)
         if(response.error) {
             setAlert(response.error)
             return null
@@ -185,7 +195,8 @@ export function ApiContextProvider({children}: {children: ReactNode}) {
     }
 
     async function releaseVehicle(vin: string) {
-        const response = await fmsReleasePipeline(vin, 'AAA')
+        const token = await getAccessTokenSilently()
+        const response = await fmsReleasePipeline(vin, token)
         if(response.error) {
             setAlert(response.error)
             return

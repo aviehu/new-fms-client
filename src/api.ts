@@ -4,7 +4,7 @@ import { ReturnVideoPipeline, VideoPipeline} from "./types";
 export async function fmsCreatePipeline(body:  Record<string, string | number>, token: string): Promise<ReturnVideoPipeline> {
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/videopipeline`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'POST',
@@ -17,8 +17,8 @@ export async function fmsAssignPipeline(vin: string, native_node: 'true' | 'fals
     const url = `${import.meta.env.VITE_DLC_BASE_URL}/videopipeline/${vin}/assign?native_node=${native_node}${node_set ? `&node_set=${node_set}` : ''}`
     const res = await fetch(url, {
         headers: {
-            'x-driveu-api-token': token,
-            'Content-Type': "application/json"
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': "application/json",
         },
         method: 'POST',
     })
@@ -28,7 +28,7 @@ export async function fmsAssignPipeline(vin: string, native_node: 'true' | 'fals
 export async function fmsUpdateOverrides(relay_uuid: string, static_allocation: boolean | undefined, planned_downtime: boolean | undefined, token: string): Promise<VideoPipeline> {
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/videopipeline/${relay_uuid}`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'PATCH',
@@ -41,7 +41,7 @@ export async function fmsGetVideoPipelines(machine_identifier: string | null, as
     const query = querystring.stringify({machine_identifier, assigned})
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/videopipeline?${query}`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'GET',
@@ -52,7 +52,7 @@ export async function fmsGetVideoPipelines(machine_identifier: string | null, as
 export async function fmsGetVideoPipeline(vin: string, token: string): Promise<ReturnVideoPipeline> {
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/videopipeline/${vin}`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'GET',
@@ -63,7 +63,7 @@ export async function fmsGetVideoPipeline(vin: string, token: string): Promise<R
 export async function fmsReleasePipeline(vin: string, token: string): Promise<ReturnVideoPipeline> {
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/videopipeline/${vin}/release`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'POST',
@@ -74,7 +74,7 @@ export async function fmsReleasePipeline(vin: string, token: string): Promise<Re
 export async function fmsGetRelayStatus(relay_uuid: string, token: string): Promise<any> {
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/videopipeline/relayStatus/${relay_uuid}`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'GET',
@@ -85,7 +85,7 @@ export async function fmsGetRelayStatus(relay_uuid: string, token: string): Prom
 export async function fmsDeletePipeline(relay_uuid: string, token: string): Promise<ReturnVideoPipeline> {
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/videopipeline/${relay_uuid}`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'DELETE',
@@ -96,7 +96,7 @@ export async function fmsDeletePipeline(relay_uuid: string, token: string): Prom
 export async function fmsReleaseByRelayUuid(relay_uuid: string, token:string): Promise<ReturnVideoPipeline> {
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/videopipeline/byrelayuuid/${relay_uuid}/release`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'POST',
@@ -107,7 +107,7 @@ export async function fmsReleaseByRelayUuid(relay_uuid: string, token:string): P
 export async function fmsReleaseAndAssign(vin: string, relay_uuid: string, streamer_uuid: string, token: string): Promise<ReturnVideoPipeline> {
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/videopipeline/releaseandassign`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'POST',
@@ -126,7 +126,7 @@ export async function fmsCreatePriority(group: string | null, node_set: string |
     })
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/fmspriorities`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'POST',
@@ -138,7 +138,7 @@ export async function fmsCreatePriority(group: string | null, node_set: string |
 export async function fmsGetPriorities(token: string) {
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/fmspriorities`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'GET',
@@ -149,7 +149,7 @@ export async function fmsGetPriorities(token: string) {
 export async function fmsGetPriority(node_set: string, token: string) {
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/fmspriorities/${node_set}`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'GET',
@@ -160,7 +160,7 @@ export async function fmsGetPriority(node_set: string, token: string) {
 export async function fmsUpdatePriority(node_set: string, group: string | null, relay_sets: string[] | null, token: string) {
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/fmspriorities/${node_set}`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'PUT',
@@ -172,7 +172,7 @@ export async function fmsUpdatePriority(node_set: string, group: string | null, 
 export async function fmsDeletePriority(node_set: string, token: string) {
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/fmspriorities/${node_set}`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'DELETE',
@@ -184,7 +184,7 @@ export async function fmsDeletePriority(node_set: string, token: string) {
 export async function fmsGetAllVehicles(token: string) {
     const res = await fetch(`${import.meta.env.VITE_DLC_BASE_URL}/vehicle`, {
         headers: {
-            'x-driveu-api-token': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': "application/json"
         },
         method: 'GET',
