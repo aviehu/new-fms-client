@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Client from "./janusClient"
 import NodeApi from "./nodeApi"
-import {Button, Chip, Fab, Stack, Tooltip} from "@mui/material";
+import { Chip, Fab, Stack, Tooltip, Typography} from "@mui/material";
 import './WebRtc.css';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
@@ -12,6 +12,7 @@ import WidthFullIcon from '@mui/icons-material/WidthFull';
 import WidthNormalIcon from '@mui/icons-material/WidthNormal';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import {SOCKET_STATES} from "./RtcSocket.ts";
 
 const fullPageStyle = {
     left: 0,
@@ -24,7 +25,7 @@ const fullPageStyle = {
     justifyContent: 'center'
 }
 
-const Stream = ({ stream, url, node, control, picassoWsUrl }) => {
+const Stream = ({ stream, url, node, control, picassoWsUrl, hostId, nodeConnected, socketState}) => {
 
     const api = NodeApi(node)
 
@@ -38,6 +39,7 @@ const Stream = ({ stream, url, node, control, picassoWsUrl }) => {
     const containerRef = useRef();
     const [canvasShapes] = useState({ current: [] });
     const [resolution] = useState({});
+    const [showButtons, setShowButtons] = useState(true)
     function isStreamLive(age){
         return age < 100
     }
@@ -46,7 +48,19 @@ const Stream = ({ stream, url, node, control, picassoWsUrl }) => {
         setDebug(!debug)
     }
 
+
+
     useEffect(() => {
+        let hideButtonsTimeout = null
+        function monitorMouse() {
+            setShowButtons(true)
+            clearTimeout(hideButtonsTimeout)
+            hideButtonsTimeout = setTimeout(() => {
+                setShowButtons(false)
+            }, 3000)
+        }
+        monitorMouse()
+        addEventListener("mousemove", monitorMouse);
         var janus = new Client(url)
         janus.subscribe("slow_link", (info) => {
             setLoss(info)
@@ -61,7 +75,13 @@ const Stream = ({ stream, url, node, control, picassoWsUrl }) => {
             //     echoForLatency()
         });
         janus.startClient()
-        return () => janus ? janus.closeClient() : null
+        return () => {
+            if(janus) {
+                janus.closeClient()
+            }
+            removeEventListener("mousemove", monitorMouse)
+            clearTimeout(hideButtonsTimeout)
+        }
     }, []);
 
     function resizeCanvas () {
@@ -326,7 +346,6 @@ const Stream = ({ stream, url, node, control, picassoWsUrl }) => {
 
     return (<div>
             <video ref={videoRef}
-                   src={'https://www.w3schools.com/tags/movie.mp4'}
                    style={{left: 0, position: 'absolute', top: 0, width: '100%', height: '100%'}}
                    key={stream.id} id={"remotevideo" + stream.id} autoPlay muted></video>
             <div style={fullPageStyle}>
@@ -343,11 +362,23 @@ const Stream = ({ stream, url, node, control, picassoWsUrl }) => {
                     <img className="video-label-bottom-right"
                          src={control ? '/public/control_corner.png' : '/public/monitoring_corner.png'}/>
                     {
-                        ! control ? null :
+                        !control || !showButtons ? null :
                             <div>
+                                <Stack direction={'row'} style={{position: 'absolute', left: 35, right: 35, top: 35}} justifyContent={'space-evenly'}>
+                                    <Stack direction={'row'} spacing={4}>
+                                        <Stack spacing={1}>
+                                            <Chip style={{backgroundColor: "#e0e2e0"}} size={'small'} label={'Node API'}/>
+                                            <Chip size={'small'} color={nodeConnected ? 'success' : 'error'} label={nodeConnected ? 'Online' : 'Offline'}/>
+                                        </Stack>
+                                        <Stack spacing={1}>
+                                            <Chip style={{backgroundColor: "#e0e2e0"}} size={'small'} label={'Node Socket'}/>
+                                            <Chip size={'small'} color={socketState === SOCKET_STATES.conncted ? 'success' : 'error'} label={socketState}/>
+                                        </Stack>
+                                    </Stack>
+                                </Stack>
                                 <Stack style={{position: 'absolute', left: 35, bottom: 35}} spacing={4} direction={'row'}>
                                     <Tooltip placement={'top'} title={'Resume'}>
-                                        <Fab size="small" onClick={api.resumeVideo}>
+                                        <Fab size="small" onClick={api.resumeVideo}  >
                                             <PlayArrowIcon/>
                                         </Fab>
                                     </Tooltip>
@@ -390,6 +421,7 @@ const Stream = ({ stream, url, node, control, picassoWsUrl }) => {
                                     </Tooltip>
                                 </Stack>
                                 <Stack style={{position: 'absolute', left: 35, top: 35}} spacing={4} direction={'column'}>
+                                    <Typography>{control ? 'In Control - ' : 'Monitoring - '}{hostId}</Typography>
                                     <Tooltip title={'Cycle Left'}>
                                         <Fab size="small" onClick={api.cycleLayoutLeft}>
                                             <ArrowBackIcon/>
@@ -488,94 +520,6 @@ const Stream = ({ stream, url, node, control, picassoWsUrl }) => {
                         <b style={{color: "#37CE37", marginLeft: "5px"}}>| {loss.uplink ? "Uplink" : "Downlink"} loss:
                             ~{loss.lost} pk</b> : null}
                 </div>
-                {
-                    !control ?
-                        null :
-                        <div>
-                            <div className="vCenterItems-webrtc">
-                                <div className="hCenterItems-webrtc">
-                                    <b>Video</b>
-                                    <div className="vCenterItems-webrtc">
-                                        <Button className="controlButton" variant="secondary"
-                                                onClick={api.resumeVideo}>resume</Button>
-                                        <Button className="controlButton" variant="secondary"
-                                                onClick={api.pauseVideo}>pause</Button>
-                                        <Button className="controlButton" variant="secondary"
-                                                onClick={api.forceIdr}>IDR</Button>
-                                    </div>
-                                </div>
-                                <div className="hCenterItems-webrtc">
-                                    <b>Layouts</b>
-                                    <div className="vCenterItems-webrtc">
-                                        <Button className="controlButton" variant="secondary"
-                                                onClick={api.cycleLayoutLeft}>cycle left</Button>
-                                        <Button className="controlButton" variant="secondary"
-                                                onClick={api.cycleLayoutRight}>cycle right</Button>
-                                    </div>
-                                </div>
-                                <div className="hCenterItems-webrtc">
-                                    <b>Bandwidth</b>
-                                    <div className="vCenterItems-webrtc">
-                                        <Button className="controlButton" variant="secondary"
-                                                onClick={() => api.setBandwidth(1000)}>max bw 1000</Button>
-                                        <Button className="controlButton" variant="secondary"
-                                                onClick={() => api.setBandwidth(2500)}>max bw 2500</Button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="vCenterItems-webrtc">
-                                <div className="hCenterItems-webrtc">
-                                    <b>Post Processing</b>
-                                    <div className="vCenterItems-webrtc">
-                                        <div className="hCenterItems-webrtc">
-                                            <Button className="controlButton" variant="secondary"
-                                                    onClick={api.increaseSaturation}>saturation up</Button>
-                                            <Button className="controlButton" variant="secondary"
-                                                    onClick={api.decreaseSaturation}>saturation down</Button>
-                                        </div>
-                                        <div className="hCenterItems-webrtc">
-                                            <Button className="controlButton" variant="secondary"
-                                                    onClick={api.increaseContrast}>contrast up</Button>
-                                            <Button className="controlButton" variant="secondary"
-                                                    onClick={api.decreaseContrast}>contrast down</Button>
-                                        </div>
-                                        <div className="hCenterItems-webrtc">
-                                            <Button className="controlButton" variant="secondary"
-                                                    onClick={api.increaseBrightness}>brightness up</Button>
-                                            <Button className="controlButton" variant="secondary"
-                                                    onClick={api.decreaseBrightness}>brightness down</Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="vCenterItems-webrtc">
-                                <div className="hCenterItems-webrtc">
-                                    <b>Overlay</b>
-                                    <div className="vCenterItems-webrtc">
-                                        <Button className="controlButton" variant="secondary"
-                                                onClick={() => api.overlayOne()}>1</Button>
-                                        <Button className="controlButton" variant="secondary"
-                                                onClick={() => api.overlayTwo()}>2</Button>
-                                        <Button className="controlButton" variant="secondary"
-                                                onClick={() => api.overlayThree()}>3</Button>
-                                        <Button className="controlButton" variant="secondary"
-                                                onClick={() => api.overlayFour()}>4</Button>
-                                        <Button className="controlButton" variant="secondary"
-                                                onClick={() => api.overlayFive()}>5</Button>
-                                    </div>
-                                </div>
-                                <div className="hCenterItems-webrtc">
-                                    <b>Latency</b>
-                                    <div className="vCenterItems-webrtc">
-                                        <Button className="controlButton" variant="secondary"
-                                                onClick={api.setLowLatencyMode}>low</Button>
-                                        <Button className="controlButton" variant="secondary"
-                                                onClick={api.setHighLatencyMode}>high</Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                }
             </div>
         </div>
     )

@@ -41,7 +41,7 @@ const protocol = isLocal ? "http://" : "https://"
 
 
 export default function WebRtcPage() {
-    const {node_uuid, rtc_url, hostId, node_url, node_socket_url, description, control, picassoWsUrl} = useParams()
+    const {node_uuid, rtc_url, hostId, node_url, node_socket_url, control, picassoWsUrl} = useParams()
     const updateSocket = useWebSocket();
     const [serverReady, setServerReady] = useState(false);
     const [webRtcUrl, setwebRtcUrl] = useState<string | null>(null);
@@ -169,11 +169,8 @@ export default function WebRtcPage() {
 
     return (
         <div >
-            <div>
-                <h2>{hostId + " :: " + description}</h2>
-            </div>
             {
-                ! serverReady ?
+                 !serverReady ?
                     (
                         <div>NO RTC AVAILABLE</div>
                     )
@@ -183,7 +180,19 @@ export default function WebRtcPage() {
                             <div className="vCenterItems-webrtc">
                                 {
                                     streams.map((stream) =>{
-                                        return <Stream key={stream.id} stream={stream} url={webRtcUrl} node={nodeUrl} control={control ? inControl : control} picassoWsUrl={picassoWsUrl}/>
+                                        return <Stream
+                                            hostId={hostId}
+                                            metaData={metaData}
+                                            joystickData={joystickData}
+                                            key={stream.id}
+                                            stream={stream}
+                                            url={webRtcUrl}
+                                            node={nodeUrl}
+                                            control={control ? inControl : control}
+                                            picassoWsUrl={picassoWsUrl}
+                                            socketState={socketState}
+                                            nodeConnected={nodeConnected}
+                                        />
                                     })
                                 }
                             </div>
@@ -228,12 +237,6 @@ export default function WebRtcPage() {
                                                         null
                                                 }
                                             </div>
-                                        </div>
-                                        <div className="hCenterItems2-webrtc" style={{minHeight: "145px"}}>
-                                            <b>Socket</b>
-                                            <b style={{color: socket.isConnected() ? "#37CE37" : "red"}}>{socketState}</b>
-                                            <b>Node</b>
-                                            <b style={{color: nodeConnected ? "#37CE37" : "red"}}>{nodeConnected ? 'Online' : 'Offline'}</b>
                                         </div>
                                         <div className="hCenterItems2-webrtc" style={{minHeight: "145px"}}>
                                             <b>Metrics</b>
