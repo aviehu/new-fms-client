@@ -16,7 +16,6 @@ import {ReturnVideoPipeline, Vehicle} from "../../types";
 import MonitorIcon from '@mui/icons-material/Monitor';
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import LinkOffIcon from '@mui/icons-material/LinkOff';
-import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {useAuth0} from "@auth0/auth0-react";
 
@@ -35,7 +34,6 @@ function StreamerStatus({status}: {status: string}) {
 export default function VehiclesPage() {
     const {getIdTokenClaims} = useAuth0()
     const { vehicles, videoPipelines, releaseVehicle, assignVehicle } = useApi()
-    const navigate = useNavigate()
     const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>(vehicles)
     const [search, setSearch] = useState<string>('')
     const [isAdmin, setIsAdmin] = useState<boolean>(false)
@@ -79,7 +77,7 @@ export default function VehiclesPage() {
             return
         }
         const {rtc_https_url, node_https_url, node_wss_url, picassoWsUrl, node_uuid} = assignedPipeline
-        navigate(`/stream/${rtc_https_url}/${vin}/${node_https_url}/${node_wss_url}/descriptionPlaceHolder/${control}/false/${picassoWsUrl}/${node_uuid}`)
+        window.open(`/stream/${rtc_https_url}/${vin}/${node_https_url}/${node_wss_url}/descriptionPlaceHolder/${control}/false/${picassoWsUrl}/${node_uuid}`, "_blank")
     }
 
     async function handleNode(vehicle: Vehicle, videoPipeline: ReturnVideoPipeline | undefined, control: boolean) {
