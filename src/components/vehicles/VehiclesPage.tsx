@@ -53,7 +53,7 @@ export default function VehiclesPage() {
             if(!claims) {
                 return false
             }
-            setIsAdmin(claims['https://driveu.auto/roles'].includes('Admin'))
+            setIsAdmin(claims[import.meta.env.VITE_ROLES_KEY].includes('Admin'))
         }
         isAdmin()
     }, [getIdTokenClaims]);
