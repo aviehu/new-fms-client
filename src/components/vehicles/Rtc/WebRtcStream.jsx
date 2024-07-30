@@ -362,7 +362,11 @@ const Stream = ({ stream, url, node, control, picassoWsUrl, hostId, nodeConnecte
                     <img className="video-label-bottom-right"
                          src={control ? '/public/control_corner.png' : '/public/monitoring_corner.png'}/>
                     {
-                        !control || !showButtons ? null :
+                        !control || !showButtons ?
+                            <Stack style={{position: 'absolute', left: 35, top: 35}} spacing={4} direction={'column'}>
+                                <Chip style={{backgroundColor: "#e0e2e0"}} size={'small'} label={`'Monitoring - ${hostId}`}/>
+                            </Stack>
+                            :
                             <div>
                                 <Stack direction={'row'} style={{position: 'absolute', left: 35, right: 35, top: 35}} justifyContent={'space-evenly'}>
                                     <Stack direction={'row'} spacing={4}>
@@ -421,7 +425,7 @@ const Stream = ({ stream, url, node, control, picassoWsUrl, hostId, nodeConnecte
                                     </Tooltip>
                                 </Stack>
                                 <Stack style={{position: 'absolute', left: 35, top: 35}} spacing={4} direction={'column'}>
-                                    <Typography>{control ? 'In Control - ' : 'Monitoring - '}{hostId}</Typography>
+                                    <Chip style={{backgroundColor: "#e0e2e0"}} size={'small'} label={`In Control - ${hostId}`}/>
                                     <Tooltip title={'Cycle Left'}>
                                         <Fab size="small" onClick={api.cycleLayoutLeft}>
                                             <ArrowBackIcon/>
@@ -509,7 +513,6 @@ const Stream = ({ stream, url, node, control, picassoWsUrl, hostId, nodeConnecte
                     }
                 </div>
             </div>
-
             <div>
                 <div className="vCenterItems-webrtc">
                     {isStreamLive(age) ? <b style={{color: "#37CE37"}} onClick={updateDebug}>WebRTC ONLINE</b> :

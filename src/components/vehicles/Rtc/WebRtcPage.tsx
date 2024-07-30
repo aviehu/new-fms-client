@@ -177,116 +177,27 @@ export default function WebRtcPage() {
     return (
         <div >
             {
-                 !serverReady ?
+                !serverReady ?
                     (
                         <div>NO RTC AVAILABLE</div>
-                    )
-                    :
+                    ) :
                     (
-                        <div>
-                            <div className="vCenterItems-webrtc">
-                                {
-                                    streams.map((stream) =>{
-                                        return <Stream
-                                            hostId={hostId}
-                                            metaData={metaData}
-                                            joystickData={joystickData}
-                                            key={stream.id}
-                                            stream={stream}
-                                            url={webRtcUrl}
-                                            node={nodeUrl}
-                                            control={control ? inControl : control}
-                                            picassoWsUrl={picassoWsUrl}
-                                            socketState={socketState}
-                                            nodeConnected={nodeConnected}
-                                        />
-                                    })
-                                }
-                            </div>
-                            <br></br>
+                        <div className="vCenterItems-webrtc">
                             {
-                                streams.length === 0 || !control || !inControl ?
-                                    // null :
-                                    <div className="hCenterItems2-webrtc" style={{minHeight: "145px"}}>
-                                        <b>Metrics</b>
-                                        <div className="hCenterItems-webrtc">
-                                            <div className="vCenterItems-webrtc">
-                                                <div>Battery:</div>
-                                                <div>{metaData ? metaData.battery : "N/A"}</div>
-                                            </div>
-                                            <div>
-                                                <b>Motor temp:</b>
-                                                <b>{metaData ? metaData.temperature : "N/A"}</b>
-                                            </div>
-                                            <div>
-                                                <b>Speed:</b>
-                                                <b>{metaData ? metaData.speed : "N/A"}</b>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    :
-                                    <div className="vCenterItems-webrtc">
-                                        <div className="hCenterItems2-webrtc" style={{minHeight: "145px"}}>
-                                            <b>Control</b>
-                                            <div className="hCenterItems-webrtc">
-                                                <div style={{color: joystickData ? "#37CE37" : "red"}}>{joystickData ? ((socket.isConnected() ? "Transmitting data" : "Joystick detected")) : "Joystick not detected"}</div>
-                                                {
-                                                    joystickData ?
-                                                        <div className="hCenterItems-webrtc">
-                                                            <div>
-                                                                <b>{joystickData.axes.toString()}</b>
-                                                            </div>
-                                                            <div>
-                                                                <b>{joystickData.buttons.toString(2)}</b>
-                                                            </div>
-                                                        </div>
-                                                        :
-                                                        null
-                                                }
-                                            </div>
-                                        </div>
-                                        <div className="hCenterItems2-webrtc" style={{minHeight: "145px"}}>
-                                            <b>Metrics</b>
-                                            <div className="vCenterItems-webrtc">
-                                                <div className="hCenterItems-webrtc">
-                                                    <div className="vCenterItems-webrtc">
-                                                        <div>Battery: </div>
-                                                        <div>{metaData ? metaData.battery : "N/A"}</div>
-                                                    </div>
-                                                    <div className="vCenterItems-webrtc">
-                                                        <div>Motor temp: </div>
-                                                        <div>{metaData ? metaData.temperature : "N/A"}</div>
-                                                    </div>
-                                                    <div className="vCenterItems-webrtc">
-                                                        <div>Speed: </div>
-                                                        <div>{metaData ? metaData.speed : "N/A"}</div>
-                                                    </div>
-                                                    <div className="vCenterItems-webrtc">
-                                                        <div>Heading: </div>
-                                                        <div>{metaData ? metaData.heading : "N/A"}</div>
-                                                    </div>
-                                                </div>
-                                                <div className="hCenterItems-webrtc">
-                                                    <div className="vCenterItems-webrtc">
-                                                        <div>Lights State : </div>
-                                                        <div>{metaData ? metaData.lightsState : "N/A"}</div>
-                                                    </div>
-                                                    <div className="vCenterItems-webrtc">
-                                                        <div>Locking State: </div>
-                                                        <div>{metaData ? metaData.lockingState : "N/A"}</div>
-                                                    </div>
-                                                    <div className="vCenterItems-webrtc">
-                                                        <div>Ebrake: </div>
-                                                        <div>{metaData ? metaData.ebrake : "N/A"}</div>
-                                                    </div>
-                                                    <div className="vCenterItems-webrtc">
-                                                        <div>Behaviour ID: </div>
-                                                        <div>{metaData ? metaData.behaviourID : "N/A"}</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                streams.length > 0 ?
+                                    <Stream
+                                        hostId={hostId}
+                                        metaData={metaData}
+                                        joystickData={joystickData}
+                                        key={streams[0].id}
+                                        stream={streams[0]}
+                                        url={webRtcUrl}
+                                        node={nodeUrl}
+                                        control={control ? inControl : control}
+                                        picassoWsUrl={picassoWsUrl}
+                                        socketState={socketState}
+                                        nodeConnected={nodeConnected}
+                                    /> : null
                             }
                         </div>
                     )
