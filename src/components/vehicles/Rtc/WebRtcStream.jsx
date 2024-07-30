@@ -364,7 +364,7 @@ const Stream = ({ stream, url, node, control, picassoWsUrl, hostId, nodeConnecte
                     {
                         !control || !showButtons ?
                             <Stack style={{position: 'absolute', left: 35, top: 35}} spacing={4} direction={'column'}>
-                                <Chip style={{backgroundColor: "#e0e2e0"}} size={'small'} label={`'Monitoring - ${hostId}`}/>
+                                <Chip style={{backgroundColor: "#e0e2e0"}} label={`${control ? 'In Control' : 'Monitoring'} - ${hostId}`}/>
                             </Stack>
                             :
                             <div>
@@ -425,7 +425,7 @@ const Stream = ({ stream, url, node, control, picassoWsUrl, hostId, nodeConnecte
                                     </Tooltip>
                                 </Stack>
                                 <Stack style={{position: 'absolute', left: 35, top: 35}} spacing={4} direction={'column'}>
-                                    <Chip style={{backgroundColor: "#e0e2e0"}} size={'small'} label={`In Control - ${hostId}`}/>
+                                    <Chip style={{backgroundColor: "#e0e2e0"}} label={`In Control - ${hostId}`}/>
                                     <Tooltip title={'Cycle Left'}>
                                         <Fab size="small" onClick={api.cycleLayoutLeft}>
                                             <ArrowBackIcon/>
