@@ -29,7 +29,7 @@ const Stream = ({ stream, url, node, control, picassoWsUrl, hostId, nodeConnecte
 
     const api = NodeApi(node)
 
-    const [age, setAge] = useState(stream.video_age_ms || stream.media[0].age_ms)
+    const [age, setAge] = useState(stream.video_age_ms || stream.media && stream.media[0] ? stream.media[0].age_ms : 9999)
     const [latency] = useState(9999)
     const [loss, setLoss] = useState(null)
     const [picassoWs, setPicassoWs] = useState(null)

@@ -1,4 +1,4 @@
-import {useParams} from "react-router-dom"
+import { useSearchParams} from "react-router-dom"
 import {useEffect, useState} from "react"
 import { Socket, SOCKET_STATES, DEFAULT_SOCKET_PORT } from './RtcSocket.ts'
 import {useWebSocket} from "../../../hooks/useWebSocket.ts";
@@ -41,7 +41,14 @@ const protocol = isLocal ? "http://" : "https://"
 
 
 export default function WebRtcPage() {
-    const {node_uuid, rtc_url, hostId, node_url, node_socket_url, control, picassoWsUrl} = useParams()
+    const [searchParams] = useSearchParams()
+    const node_uuid = searchParams.get("node_uuid")
+    const rtc_url = searchParams.get("rtc_https_url") || ''
+    const hostId = searchParams.get("vin")
+    const node_url = searchParams.get("node_https_url") || ''
+    const node_socket_url = searchParams.get("node_wss_url")
+    const control = searchParams.get("control") === 'true'
+    const picassoWsUrl = searchParams.get("picassoWsUrl")
     const updateSocket = useWebSocket();
     const [serverReady, setServerReady] = useState(false);
     const [webRtcUrl, setwebRtcUrl] = useState<string | null>(null);
@@ -198,7 +205,7 @@ export default function WebRtcPage() {
                             </div>
                             <br></br>
                             {
-                                streams.length === 0 || control === 'false' || !inControl ?
+                                streams.length === 0 || !control || !inControl ?
                                     // null :
                                     <div className="hCenterItems2-webrtc" style={{minHeight: "145px"}}>
                                         <b>Metrics</b>

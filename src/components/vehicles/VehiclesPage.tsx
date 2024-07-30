@@ -77,7 +77,17 @@ export default function VehiclesPage() {
             return
         }
         const {rtc_https_url, node_https_url, node_wss_url, picassoWsUrl, node_uuid} = assignedPipeline
-        window.open(`/stream/${rtc_https_url}/${vin}/${node_https_url}/${node_wss_url}/descriptionPlaceHolder/${control}/false/${picassoWsUrl}/${node_uuid}`, "_blank")
+        const params = {
+            rtc_https_url: `${rtc_https_url}`,
+            vin: `${vin}`,
+            node_https_url: `${node_https_url}`,
+            node_wss_url: `${node_wss_url}`,
+            control: `${control}`,
+            picassoWsUrl: `${picassoWsUrl}`,
+            node_uuid: `${node_uuid}`
+        }
+
+        window.open(`/stream?${new URLSearchParams(params).toString()}`, "_blank")
     }
 
     async function handleNode(vehicle: Vehicle, videoPipeline: ReturnVideoPipeline | undefined, control: boolean) {

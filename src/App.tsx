@@ -37,7 +37,7 @@ function App() {
             element: <CustomAppBar><SettingsPage/></CustomAppBar>,
         },
         {
-            path: "/stream/:rtc_url/:hostId/:node_url/:node_socket_url/:description/:control/:mobile/:picassoWsUrl/:node_uuid",
+            path: "/stream",
             element: <WebRtcPage/>,
         },
         {
