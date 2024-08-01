@@ -1,4 +1,4 @@
-import { getGamepadWithoutHook } from "./useGamepad";
+import { getGamepadWithoutHook } from "./useGamepad.js";
 
 
 const Controller = function(update) {

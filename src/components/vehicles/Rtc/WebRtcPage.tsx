@@ -1,14 +1,14 @@
 import { useSearchParams} from "react-router-dom"
 import {useEffect, useState} from "react"
-import { Socket, SOCKET_STATES, DEFAULT_SOCKET_PORT } from './RtcSocket.ts'
+import { Socket, SOCKET_STATES, DEFAULT_SOCKET_PORT } from './controller/RtcSocket.ts'
 import {useWebSocket} from "../../../hooks/useWebSocket.ts";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import JanusClient from './janusClient'
+import JanusClient from './janus/janusClient'
 import NodeApi from './nodeApi'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import Controller from  './controller'
+import Controller from  './controller/controller'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import Stream from './WebRtcStream.jsx'

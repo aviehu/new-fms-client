@@ -1,18 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Client from "./janusClient"
+import Client from "./janus/janusClient.js"
 import NodeApi from "./nodeApi"
-import { Chip, Fab, Stack, Tooltip, Typography} from "@mui/material";
+import { Chip, Stack} from "@mui/material";
 import './WebRtc.css';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import PauseIcon from '@mui/icons-material/Pause';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import WidthFullIcon from '@mui/icons-material/WidthFull';
-import WidthNormalIcon from '@mui/icons-material/WidthNormal';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import {SOCKET_STATES} from "./RtcSocket.ts";
+import UiControls from "./UiControls";
+import LoadingPage from "../../LoadingPage";
 
 const fullPageStyle = {
     left: 0,
@@ -40,6 +32,7 @@ const Stream = ({ stream, url, node, control, picassoWsUrl, hostId, nodeConnecte
     const [canvasShapes] = useState({ current: [] });
     const [resolution] = useState({});
     const [showButtons, setShowButtons] = useState(true)
+    const [videoShowing, setVideoShowing] = useState(false)
     function isStreamLive(age){
         return age < 100
     }
@@ -50,6 +43,7 @@ const Stream = ({ stream, url, node, control, picassoWsUrl, hostId, nodeConnecte
 
 
 
+
     useEffect(() => {
         let hideButtonsTimeout = null
         function monitorMouse() {
@@ -57,7 +51,7 @@ const Stream = ({ stream, url, node, control, picassoWsUrl, hostId, nodeConnecte
             clearTimeout(hideButtonsTimeout)
             hideButtonsTimeout = setTimeout(() => {
                 setShowButtons(false)
-            }, 3000)
+            }, 2500)
         }
         monitorMouse()
         addEventListener("mousemove", monitorMouse);
@@ -123,8 +117,16 @@ const Stream = ({ stream, url, node, control, picassoWsUrl, hostId, nodeConnecte
     }
 
     useEffect(() => {
-        if (videoRef.current)
-            new ResizeObserver(metaDataLoaded).observe(videoRef.current);
+        if(!videoRef.current) {
+            return
+        }
+        const sizeInterval = setInterval(() => {
+            if(videoRef.current.videoWidth > 0) {
+                setVideoShowing(true)
+                clearInterval(sizeInterval)
+            }
+        }, 250)
+        new ResizeObserver(metaDataLoaded).observe(videoRef.current);
     }, [videoRef]);
 
     useEffect(() => {
@@ -345,174 +347,40 @@ const Stream = ({ stream, url, node, control, picassoWsUrl, hostId, nodeConnecte
     }, [overlayRef]);
 
     return (<div>
-            <video ref={videoRef}
-                   style={{left: 0, position: 'absolute', top: 0, width: '100%', height: '100%'}}
-                   key={stream.id} id={"remotevideo" + stream.id} autoPlay muted></video>
-            <div style={fullPageStyle}>
-                <canvas ref={overlayRef}/>
-            </div>
-            <div style={fullPageStyle}>
-                <div ref={containerRef} style={{position: 'relative'}}>
-                    <img className="video-label-top-left"
-                         src={control ? '/public/control_corner.png' : '/public/monitoring_corner.png'}/>
-                    <img className="video-label-top-right"
-                         src={control ? '/public/control_corner.png' : '/public/monitoring_corner.png'}/>
-                    <img className="video-label-bottom-left"
-                         src={control ? '/public/control_corner.png' : '/public/monitoring_corner.png'}/>
-                    <img className="video-label-bottom-right"
-                         src={control ? '/public/control_corner.png' : '/public/monitoring_corner.png'}/>
-                    {
-                        !control || !showButtons ?
-                            <Stack style={{position: 'absolute', left: 35, top: 35}} spacing={4} direction={'column'}>
-                                <Chip style={{backgroundColor: "#e0e2e0"}} label={`${control ? 'In Control' : 'Monitoring'} - ${hostId}`}/>
-                            </Stack>
-                            :
-                            <div>
-                                <Stack direction={'row'} style={{position: 'absolute', left: 35, right: 35, top: 35}} justifyContent={'space-evenly'}>
-                                    <Stack direction={'row'} spacing={4}>
-                                        <Stack spacing={1}>
-                                            <Chip style={{backgroundColor: "#e0e2e0"}} size={'small'} label={'Node API'}/>
-                                            <Chip size={'small'} color={nodeConnected ? 'success' : 'error'} label={nodeConnected ? 'Online' : 'Offline'}/>
-                                        </Stack>
-                                        <Stack spacing={1}>
-                                            <Chip style={{backgroundColor: "#e0e2e0"}} size={'small'} label={'Node Socket'}/>
-                                            <Chip size={'small'} color={socketState === SOCKET_STATES.conncted ? 'success' : 'error'} label={socketState}/>
-                                        </Stack>
-                                    </Stack>
-                                </Stack>
-                                <Stack style={{position: 'absolute', left: 35, bottom: 35}} spacing={4} direction={'row'}>
-                                    <Tooltip placement={'top'} title={'Resume'}>
-                                        <Fab size="small" onClick={api.resumeVideo}  >
-                                            <PlayArrowIcon/>
-                                        </Fab>
-                                    </Tooltip>
-                                    <Tooltip placement={'top'} title={'Pause'}>
-                                        <Fab size="small" onClick={api.pauseVideo}>
-                                            <PauseIcon/>
-                                        </Fab>
-                                    </Tooltip>
-                                    <Tooltip placement={'top'} title={'IDR'}>
-                                        <Fab size="small" onClick={api.forceIdr}>
-                                            <AutoFixHighIcon/>
-                                        </Fab>
-                                    </Tooltip>
-                                </Stack>
-                                <Stack style={{position: 'absolute', right: 35, top: 35}} spacing={4} direction={'column'}>
-                                    <Tooltip title={'Overlay 1'}>
-                                        <Fab size="small" onClick={api.overlayOne}>
-                                            1
-                                        </Fab>
-                                    </Tooltip>
-                                    <Tooltip title={'Overlay 2'}>
-                                        <Fab size="small" onClick={api.overlayTwo}>
-                                            2
-                                        </Fab>
-                                    </Tooltip>
-                                    <Tooltip title={'Overlay 3'}>
-                                        <Fab size="small" onClick={api.overlayThree}>
-                                            3
-                                        </Fab>
-                                    </Tooltip>
-                                    <Tooltip title={'Overlay 4'}>
-                                        <Fab size="small" onClick={api.overlayFour}>
-                                            4
-                                        </Fab>
-                                    </Tooltip>
-                                    <Tooltip title={'Overlay 5'}>
-                                        <Fab size="small" onClick={api.overlayFive}>
-                                            5
-                                        </Fab>
-                                    </Tooltip>
-                                </Stack>
-                                <Stack style={{position: 'absolute', left: 35, top: 35}} spacing={4} direction={'column'}>
-                                    <Chip style={{backgroundColor: "#e0e2e0"}} label={`In Control - ${hostId}`}/>
-                                    <Tooltip title={'Cycle Left'}>
-                                        <Fab size="small" onClick={api.cycleLayoutLeft}>
-                                            <ArrowBackIcon/>
-                                        </Fab>
-                                    </Tooltip>
-                                    <Tooltip title={'Cycle Right'}>
-                                        <Fab size="small" onClick={api.cycleLayoutRight}>
-                                            <ArrowForwardIcon/>
-                                        </Fab>
-                                    </Tooltip>
-                                    <Tooltip title={'Max BW 1000'}>
-                                        <Fab size="small" onClick={() => api.setBandwidth(1000)}>
-                                            <WidthNormalIcon/>
-                                        </Fab>
-                                    </Tooltip>
-                                    <Tooltip title={'Max BW 2500'}>
-                                        <Fab size="small" onClick={() => api.setBandwidth(2500)}>
-                                            <WidthFullIcon/>
-                                        </Fab>
-                                    </Tooltip>
-                                </Stack>
-                                <Stack style={{position: 'absolute', right: 35, bottom: 35}} spacing={4} direction={'row'}>
-                                    <Stack spacing={2}>
-                                        <Chip size={'small'} style={{backgroundColor: "#e0e2e0"}} label={'Saturation'}></Chip>
-                                        <Stack spacing={2} direction={'row'}>
-                                            <Tooltip placement={'top'} title={'Saturation Up'}>
-                                                <Fab size="small" onClick={api.increaseSaturation}>
-                                                    <ArrowUpwardIcon/>
-                                                </Fab>
-                                            </Tooltip>
-                                            <Tooltip placement={'top'} title={'Saturation Down'}>
-                                                <Fab size="small" onClick={api.decreaseSaturation}>
-                                                    <ArrowDownwardIcon/>
-                                                </Fab>
-                                            </Tooltip>
-                                        </Stack>
-                                    </Stack>
-                                    <Stack spacing={2}>
-                                        <Chip size={'small'} style={{backgroundColor: "#e0e2e0"}} label={'Contrast'}></Chip>
-                                        <Stack spacing={2} direction={'row'}>
-                                            <Tooltip placement={'top'} title={'Contrast Up'}>
-                                                <Fab size="small" onClick={api.increaseContrast}>
-                                                    <ArrowUpwardIcon/>
-                                                </Fab>
-                                            </Tooltip>
-                                            <Tooltip placement={'top'} title={'Contrast Down'}>
-                                                <Fab size="small" onClick={api.decreaseContrast}>
-                                                    <ArrowDownwardIcon/>
-                                                </Fab>
-                                            </Tooltip>
-                                        </Stack>
-                                    </Stack>
-                                    <Stack spacing={2}>
-                                        <Chip size={'small'} style={{backgroundColor: "#e0e2e0"}} label={'Brightness'}></Chip>
-                                        <Stack spacing={2} direction={'row'}>
-                                            <Tooltip placement={'top'} title={'Brightness Up'}>
-                                                <Fab size="small" onClick={api.increaseBrightness}>
-                                                    <ArrowUpwardIcon/>
-                                                </Fab>
-                                            </Tooltip>
-                                            <Tooltip placement={'top'} title={'Brightness Down'}>
-                                                <Fab size="small" onClick={api.decreaseBrightness}>
-                                                    <ArrowDownwardIcon/>
-                                                </Fab>
-                                            </Tooltip>
-                                        </Stack>
-                                    </Stack>
-                                    <Stack spacing={2}>
-                                        <Chip size={'small'} style={{backgroundColor: "#e0e2e0"}} label={'Latency'}></Chip>
-                                        <Stack direction={'row'} spacing={2}>
-                                            <Tooltip placement={'top'} title={'Latency Low'}>
-                                                <Fab size="small" onClick={api.resumeVideo} style={{textTransform: 'none'}}>
-                                                    Low
-                                                </Fab>
-                                            </Tooltip>
-                                            <Tooltip placement={'top'} title={'Latency High'}>
-                                                <Fab size="small" onClick={api.pauseVideo} style={{textTransform: 'none'}}>
-                                                    High
-                                                </Fab>
-                                            </Tooltip>
-                                        </Stack>
-                                    </Stack>
-                                </Stack>
-                            </div>
-                    }
+                <video ref={videoRef}
+                       style={{left: 0, position: 'absolute', top: 0, width: '100%', height: '100%'}}
+                       key={stream.id} id={"remotevideo" + stream.id} autoPlay muted/>
+                <div style={fullPageStyle}>
+                    <canvas ref={overlayRef}/>
                 </div>
-            </div>
+                <div style={fullPageStyle}>
+                    <div ref={containerRef} style={{position: 'relative'}}>
+                        {
+                            videoShowing ?
+                                <div>
+                                    <img className="video-label-top-left"
+                                         src={control ? '/public/control_corner.png' : '/public/monitoring_corner.png'}/>
+                                    <img className="video-label-top-right"
+                                         src={control ? '/public/control_corner.png' : '/public/monitoring_corner.png'}/>
+                                    <img className="video-label-bottom-left"
+                                         src={control ? '/public/control_corner.png' : '/public/monitoring_corner.png'}/>
+                                    <img className="video-label-bottom-right"
+                                         src={control ? '/public/control_corner.png' : '/public/monitoring_corner.png'}/>
+                                    {
+                                        !control || !showButtons ?
+                                            <Stack style={{position: 'absolute', left: 35, top: 35}} spacing={4}
+                                                   direction={'column'}>
+                                                <Chip style={{backgroundColor: "#e0e2e0"}}
+                                                      label={`${control ? 'In Control' : 'Monitoring'} - ${hostId}`}/>
+                                            </Stack>
+                                            :
+                                            <UiControls hostId={hostId} api={api} nodeConnected={nodeConnected}
+                                                        socketState={socketState}/>
+                                    }
+                                </div> : <LoadingPage />
+                        }
+                    </div>
+                </div>
             <div>
                 <div className="vCenterItems-webrtc">
                     {isStreamLive(age) ? <b style={{color: "#37CE37"}} onClick={updateDebug}>WebRTC ONLINE</b> :

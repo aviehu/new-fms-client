@@ -52,7 +52,6 @@ export function ApiContextProvider({children}: {children: ReactNode}) {
     const socket = useWebSocket()
     const {setAlert} = useAlerts()
     const {getAccessTokenSilently} = useAuth0()
-    getAccessTokenSilently().then(token => console.log(token))
     useEffect(() => {
         if(!socket) {
             return

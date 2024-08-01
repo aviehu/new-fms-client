@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import useGamepad from '../vehicles/Rtc/useGamepad'
+import useGamepad from '../vehicles/Rtc/controller/useGamepad'
 import {useEffect, useState} from "react";
 import {
     Box,

@@ -1,5 +1,5 @@
 // import { Janus } from 'janus-gateway';
-import Janus from './janus';
+import Janus from './janus.js';
 
 var initilized = false;
 
