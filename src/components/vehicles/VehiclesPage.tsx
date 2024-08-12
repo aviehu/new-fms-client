@@ -8,7 +8,7 @@ import {
     TableBody,
     TableCell,
     TableContainer,
-    TableHead,
+    TableHead, TablePagination,
     TableRow, TextField,
     Tooltip, Typography
 } from "@mui/material";
@@ -37,6 +37,8 @@ export default function VehiclesPage() {
     const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>(vehicles)
     const [search, setSearch] = useState<string>('')
     const [isAdmin, setIsAdmin] = useState<boolean>(false)
+    const [rowsPerPage, setRowsPerPage] = useState<number>(20)
+    const [page, setPage] = useState<number>(0)
 
     function filterVehicles(search: string): Vehicle[] {
         return vehicles.filter((vehicle) => {
@@ -105,7 +107,10 @@ export default function VehiclesPage() {
         <Box margin={5} minWidth={850}>
             <Stack direction={'row'} justifyContent={'space-between'}>
                 <Typography paddingBottom={3} variant={'h5'}>Vehicles</Typography>
-                <TextField label={'Search By Vin'} size={'small'} value={search} onChange={event => setSearch(event.target.value)}/>
+                <TextField label={'Search By Vin'} size={'small'} value={search} onChange={event => {
+                    setSearch(event.target.value)
+                    setPage(0)
+                }}/>
             </Stack>
             <TableContainer component={Paper}>
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -122,7 +127,7 @@ export default function VehiclesPage() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {filteredVehicles.map((row) => {
+                        {filteredVehicles.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
                             const videoPipeline = videoPipelines.find((pipeline) => pipeline.vin === row.vin)
                             return (
                             <TableRow
@@ -182,6 +187,18 @@ export default function VehiclesPage() {
                     </TableBody>
                 </Table>
             </TableContainer>
+            <TablePagination
+                rowsPerPageOptions={[10, 20, 50]}
+                component="div"
+                count={filteredVehicles.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={(_, newPage) => setPage(newPage)}
+                onRowsPerPageChange={(event) => {
+                    setRowsPerPage(parseInt(event.target.value));
+                    setPage(0);
+                }}
+            />
         </Box>
     )
 }
